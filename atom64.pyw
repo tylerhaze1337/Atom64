@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import base64
 import os
 import random
@@ -140,7 +140,7 @@ class ObfuscatorApp(QWidget):
         fake_size = self.fake_size_input.text()
 
         if not file_path or not os.path.isfile(file_path):
-            QMessageBox.critical(self, "Error", self.languages[self.current_language]['error_file'])
+            QMessageBox.critical(self, "Erreur", "Veuillez selectionner un fichier valide.")
             return
 
         try:
@@ -167,16 +167,66 @@ class ObfuscatorApp(QWidget):
                     f"del {script_name}\n"
                 )
 
-            # Similar code for other formats like .ps1, .sh, .js, .php...
+            elif extension == '.ps1':
+                txt_name = self.generate_random_name(".txt")
+                script_name = self.generate_random_name(".ps1")
+                obfuscated_script = (
+                    f"$b64 = \"{encoded}\"\n"
+                    f"Set-Content -Path {txt_name} -Value $b64\n"
+                    f"$decoded = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((Get-Content {txt_name})))\n"
+                    f"Set-Content -Path {script_name} -Value $decoded\n"
+                    f"powershell -ExecutionPolicy Bypass -File {script_name}\n"
+                    f"Remove-Item {txt_name}, {script_name}\n"
+                )
+
+            elif extension == '.sh':
+                txt_name = self.generate_random_name(".txt")
+                script_name = self.generate_random_name(".sh")
+                obfuscated_script = (
+                    f"#!/bin/bash\n"
+                    f"echo {encoded} > {txt_name}\n"
+                    f"base64 -d {txt_name} > {script_name}\n"
+                    f"chmod +x {script_name}\n"
+                    f"./{script_name}\n"
+                    f"rm {txt_name} {script_name}\n"
+                )
+
+            elif extension == '.js':
+                txt_name = self.generate_random_name(".txt")
+                obfuscated_script = (
+                    f"const fs = require('fs');\n"
+                    f"fs.writeFileSync('{txt_name}', '{encoded}');\n"
+                    f"const decoded = Buffer.from(fs.readFileSync('{txt_name}', 'utf8'), 'base64').toString('utf8');\n"
+                    f"eval(decoded);\n"
+                    f"fs.unlinkSync('{txt_name}');\n"
+                )
+
+            elif extension == '.php':
+                txt_name = self.generate_random_name(".txt")
+                script_name = self.generate_random_name(".php")
+                obfuscated_script = (
+                    f"<?php\n"
+                    f"file_put_contents('{txt_name}', '{encoded}');\n"
+                    f"$decoded = base64_decode(file_get_contents('{txt_name}'));\n"
+                    f"file_put_contents('{script_name}', $decoded);\n"
+                    f"include '{script_name}';\n"
+                    f"unlink('{txt_name}'); unlink('{script_name}');\n"
+                    f"?>\n"
+                )
+
+            else:
+                QMessageBox.critical(self, "Erreur", "Format de fichier non supporte.")
+                return
 
             obfuscated_file_path = file_path + ".obfuscated" + extension
             with open(obfuscated_file_path, "w") as f:
                 f.write(obfuscated_script)
 
-            QMessageBox.information(self, "Success", self.languages[self.current_language]['success_message'] + obfuscated_file_path)
+            QMessageBox.information(self, "Succes", f"Fichier obfusque : {obfuscated_file_path}")
 
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+            QMessageBox.critical(self, "Erreur", f"Une erreur est survenue : {str(e)}")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
