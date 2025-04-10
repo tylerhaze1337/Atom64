@@ -1,6 +1,6 @@
 # Atom64 - File Obfuscation Tool 🚀
 
-![atom64 - Copie](https://github.com/user-attachments/assets/acf6f008-8d13-427c-8597-805a156405b4)
+   ![image](https://github.com/user-attachments/assets/443cee28-a137-46c6-b5ba-a7acbf2accb8)
 
 
 **Atom64** is a file obfuscation tool designed to **secure and protect your scripts** by adding fake sizes and encoding content in base64. Whether you're a developer looking to hide the internal logic of your scripts or a security enthusiast who wants to obfuscate code for privacy 🔒✨
